@@ -184,4 +184,19 @@ for batch in loader:
     g = make_dot(y, params=dict(plot_model.named_parameters()))
     g.view()
     break
+#embedding visualization
+# dataset: dblp
+writer = SummaryWriter("./log"+ datetime.now().strftime("%Y%m%d-%H%M%S"))
+model = train(data_dblp, 'node', writer)
+color_list = ["red", "orange", "green", "blue", "purple", "brown","black"]
+loader = DataLoader(data_dblp, batch_size=64, shuffle=True)
+embs = []
+colors = []
+for batch in loader:
+    emb, pred = model(batch)
+    embs.append(emb)
+    colors += [color_list[y] for y in batch.y]
+embs = torch.cat(embs, dim=0)
 
+xs, ys = zip(*TSNE().fit_transform(embs.detach().numpy()))
+plt.scatter(xs, ys, color=colors)
